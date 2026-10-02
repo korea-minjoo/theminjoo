@@ -1,45 +1,69 @@
 {
- "fetched_at": "2026-10-02T12:49:47Z",
+ "redirects": [
+  [
+   "https://theminjoo.kr/main/sub/introduce/team.php",
+   307,
+   "https://theminjoo.kr/main/sub/introduce/team.php",
+   "CYBER=oNfpOqv1y3hPImmbT2HrZzh5XIBInGRHNhJpHKSz9Mqd8L0+Kmij8SOPqJ9sPWocImZCua21iH"
+  ],
+  [
+   "https://theminjoo.kr/",
+   307,
+   "https://theminjoo.kr/",
+   "CYBER=FzcJPtSl2ip8VY2bT2HrZzh5XIBInJPNl4ouyskQGcy8rA2W730eIUFs2VPehp70zqHas2yA/G"
+  ]
+ ],
+ "fetched_at": "2026-10-02T12:51:19Z",
  "pages": {
   "team": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 279570
+  },
+  "team_www": {
+   "url": "https://www.theminjoo.kr/main/sub/introduce/team.php",
+   "ok": true,
+   "chars": 279570
+  },
+  "home": {
+   "url": "https://theminjoo.kr/",
+   "ok": true,
+   "chars": 0
   },
   "class1": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=1",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 279570
   },
   "class2": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=2",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 913566
   },
   "class3": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=3",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 94329
   },
   "class4": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=4",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 70077
   },
   "class5": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=5",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 1085122
   },
   "class6": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=6",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 1085122
   },
   "class7": {
    "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=7",
-   "ok": false,
-   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+   "ok": true,
+   "chars": 1085122
   }
  }
 }
