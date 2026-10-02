@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "특정 선거 ID만 (예: 20260603, 비우면 전체, probe = 승인 상태 점검)"
+        description: "특정 선거 ID만 (예: 20260603, 비우면 전체, probe = 승인 상태 점검, votes = 투·개표)"
         required: false
   push:
     paths:
@@ -38,6 +38,7 @@ jobs:
           fi
           cd tools/nec
           if [ "$ONLY" = "probe" ]; then python nec_collect.py --probe < /dev/null
+          elif [ "$ONLY" = "votes" ]; then python nec_collect.py --votes < /dev/null
           elif [ -n "$ONLY" ]; then python nec_collect.py --only "$ONLY" < /dev/null; else python nec_collect.py < /dev/null; fi
       - name: 결과 저장
         if: always()

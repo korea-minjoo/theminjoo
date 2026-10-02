@@ -132,6 +132,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="이 sgId 하나만 수집")
     ap.add_argument("--probe", action="store_true", help="API별 1회씩 호출해 승인·접속 상태만 확인")
+    ap.add_argument("--votes", action="store_true", help="투표율·개표결과만 수집(nec/votes_<sgId>.json)")
     ap.add_argument("--budget", type=int, default=9000, help="이번 실행 최대 호출 수")
     a = ap.parse_args()
     budget = a.budget
@@ -142,6 +143,23 @@ def main():
         sys.exit("인증키가 없습니다.")
     KEY = urllib.parse.quote(KEY, safe="")
     os.makedirs(OUTDIR, exist_ok=True)
+    if a.votes:
+        try:
+            for sg, ts in sorted(FALLBACK.items(), reverse=True):
+                fp = os.path.join(OUTDIR, f"votes_{sg}.json")
+                if os.path.exists(fp):
+                    continue
+                out = {"sgId": sg, "types": {}}
+                for tc in ts:
+                    out["types"][tc] = {"turnout": fetch_all("turnout", sgId=sg, sgTypecode=tc),
+                                        "count": fetch_all("count", sgId=sg, sgTypecode=tc)}
+                out["fetched_at"] = datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")
+                json.dump(out, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+                print(sg, {tc: [len(r["turnout"]["items"]), len(r["count"]["items"]), r["count"]["code"]] for tc, r in out["types"].items()})
+        except Budget:
+            print(f"호출 한도({budget}) 도달 — 다음 실행 때 이어받습니다.")
+        print("총 호출", calls)
+        return
     if a.probe:
         sample = {"sgId": "20220601", "sgTypecode": "3"}
         tests = {"codes": {}, "parties": {"sgId": "20220601"}, "winners": sample, "candidates": sample,
