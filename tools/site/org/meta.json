@@ -1,0 +1,45 @@
+{
+ "fetched_at": "2026-10-02T12:49:47Z",
+ "pages": {
+  "team": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  },
+  "class1": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=1",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  },
+  "class2": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=2",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  },
+  "class3": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=3",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  },
+  "class4": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=4",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  },
+  "class5": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=5",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  },
+  "class6": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=6",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  },
+  "class7": {
+   "url": "https://theminjoo.kr/main/sub/introduce/team.php?class=7",
+   "ok": false,
+   "error": "HTTP Error 307: The HTTP server returned a redirect error that would lead to an infinite loop.\nThe last 30x error message was:\nTemporary Redirect"
+  }
+ }
+}
