@@ -25,6 +25,8 @@ API = {
     "candidates": "PofelcddInfoInqireService/getPofelcddRegistSttusInfoInqire",
     "pledges": "ElecPrmsInfoInqireService/getCnddtElecPrmsInfoInqire",
     "party_policy": "PartyPlcInfoInqireService/getPartyPlcInfoInqire",
+    "turnout": "VoteXmntckInfoInqireService2/getVoteSttusInfoInqire",
+    "count": "VoteXmntckInfoInqireService2/getXmntckSttusInfoInqire",
 }
 
 
@@ -143,14 +145,22 @@ def main():
     if a.probe:
         sample = {"sgId": "20220601", "sgTypecode": "3"}
         tests = {"codes": {}, "parties": {"sgId": "20220601"}, "winners": sample, "candidates": sample,
-                 "pledges": {**sample, "cnddtId": "0"}, "party_policy": {"sgId": "20220601", "partyName": "더불어민주당"}}
+                 "pledges": {**sample, "cnddtId": "0"}, "party_policy": {"sgId": "20220601", "partyName": "더불어민주당"},
+                 "turnout": sample, "count": sample,
+                 "candidates2026": {"sgId": "20260603", "sgTypecode": "3"},
+                 "candidates2026_sd": {"sgId": "20260603", "sgTypecode": "3", "sdName": "서울특별시"},
+                 "candidates2026_t4": {"sgId": "20260603", "sgTypecode": "4", "sdName": "서울특별시"}}
         for name, prm in tests.items():
-            d = call_page(API[name], 1, **prm)
+            api = API.get(name) or API[name.split("2026")[0]]
+            d = call_page(api, 1, **prm)
             if "_error" in d:
                 print(f"[{name}] 실패: {d['_error']}")
             else:
                 hdr = d.get("response", {}).get("header") or d.get("OpenAPI_ServiceResponse", {}).get("cmmMsgHeader", {})
-                print(f"[{name}] 응답: {json.dumps(hdr, ensure_ascii=False)[:200]}")
+                body = d.get("response", {}).get("body") or {}
+                it = (body.get("items") or {}).get("item") or []
+                it = it[0] if isinstance(it, list) and it else it
+                print(f"[{name}] 응답: {json.dumps(hdr, ensure_ascii=False)[:200]} total={body.get('totalCount')} 예시={json.dumps(it, ensure_ascii=False)[:400]}")
         return
 
     codes = fetch_all("codes")
