@@ -1,0 +1,51 @@
+name: 선관위 선거 데이터 수집
+
+# 서비스키는 저장소 Secrets의 DATA_GO_KR_SERVICE_KEY에서만 읽는다(로그·파일에 남기지 않음).
+# 실행: tools/nec/run.txt를 고쳐 푸시하거나 Actions 화면에서 수동 실행.
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "특정 선거 ID만 (예: 20260603, 비우면 전체)"
+        required: false
+  push:
+    paths:
+      - tools/nec/run.txt
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nec-collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 수집
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+          ONLY: ${{ github.event.inputs.only }}
+        run: |
+          if [ -z "$DATA_GO_KR_SERVICE_KEY" ]; then
+            echo "::error::저장소 Secrets에 DATA_GO_KR_SERVICE_KEY가 없습니다."; exit 1
+          fi
+          cd tools/nec
+          if [ -n "$ONLY" ]; then python nec_collect.py --only "$ONLY" < /dev/null; else python nec_collect.py < /dev/null; fi
+      - name: 결과 저장
+        if: always()
+        run: |
+          cd tools/nec
+          [ -d nec ] || { echo "결과 없음"; exit 0; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git add nec
+          git diff --cached --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "선관위 선거 데이터 수집 결과 ($(date -u +%F))"
+          git push
