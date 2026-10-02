@@ -28,6 +28,26 @@ API = {
 }
 
 
+# 공통코드 API가 승인되지 않았을 때 쓰는 주요 선거 목록(선관위 선거ID·선거종류코드).
+# 1 대통령, 2 국회의원(지역구), 3 시·도지사, 4 구·시·군의 장, 5 시·도의원, 6 구·시·군의원,
+# 7 국회의원(비례), 8 광역의원(비례), 9 기초의원(비례), 11 교육감
+LOCAL = ["3", "4", "5", "6", "8", "9", "11"]
+TYPE_NAMES = {"1": "대통령선거", "2": "국회의원선거", "3": "시·도지사선거", "4": "구·시·군의 장선거",
+              "5": "시·도의회의원선거", "6": "구·시·군의회의원선거", "7": "비례대표국회의원선거",
+              "8": "광역의원비례대표선거", "9": "기초의원비례대표선거", "11": "교육감선거"}
+FALLBACK = {
+    "20260603": LOCAL + ["2"],  # 제9회 전국동시지방선거(+국회의원 재·보궐)
+    "20250603": ["1"],          # 제21대 대통령선거
+    "20240410": ["2", "7"],     # 제22대 국회의원선거
+    "20220601": LOCAL + ["2"],  # 제8회 전국동시지방선거
+    "20220309": ["1"],          # 제20대 대통령선거
+    "20200415": ["2", "7"],     # 제21대 국회의원선거
+    "20180613": LOCAL,          # 제7회 전국동시지방선거
+    "20170509": ["1"],          # 제19대 대통령선거
+    "20160413": ["2", "7"],     # 제20대 국회의원선거
+}
+
+
 class Budget(Exception):
     pass
 
@@ -94,6 +114,10 @@ def collect_election(sg_id, types, parties):
                     pledge_ids.add(cid)
                     rec["pledges"][cid] = fetch_all("pledges", sgId=sg_id, sgTypecode=tc, cnddtId=cid)
         out["types"][tc] = rec
+    if not parties:  # 정당코드 API 미승인 시: 수집된 후보자·당선인의 소속 정당으로 대신한다
+        parties = sorted({p.get("jdName") for r in out["types"].values()
+                          for p in r["candidates"]["items"] + r["winners"]["items"]
+                          if p.get("jdName") and p.get("jdName") != "무소속"})
     for pn in parties:
         r = fetch_all("party_policy", sgId=sg_id, partyName=pn)
         if r["items"]:
@@ -131,9 +155,11 @@ def main():
 
     codes = fetch_all("codes")
     print("선거코드", codes["code"], codes["total"])
-    if not codes["items"]:
-        sys.exit("선거코드를 받지 못했습니다(활용신청·키 확인).")
     by_sg = {}
+    if not codes["items"]:
+        print("공통코드 API 미승인 → 주요 선거 목록(FALLBACK)으로 진행")
+        by_sg = {sg: [{"sgId": sg, "sgTypecode": t, "sgName": TYPE_NAMES[t]} for t in ts]
+                 for sg, ts in FALLBACK.items()}
     for c in codes["items"]:
         if c.get("sgTypecode") != "0":  # 0 = 선거 대표코드
             by_sg.setdefault(c["sgId"], []).append(c)
@@ -150,7 +176,7 @@ def main():
             fp = os.path.join(OUTDIR, f"{sg}.json")
             if os.path.exists(fp):
                 continue
-            parties = [p["jdName"] for p in fetch_all("parties", sgId=sg)["items"] if p.get("jdName")]
+            parties = [p["jdName"] for p in fetch_all("parties", sgId=sg)["items"] if p.get("jdName")] if codes["items"] else []
             data = collect_election(sg, by_sg.get(sg, []), parties)
             data["fetched_at"] = datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")
             json.dump(data, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
