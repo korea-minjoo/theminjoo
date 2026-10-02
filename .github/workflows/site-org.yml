@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: 수집
-        run: python tools/site/fetch_org.py
+        run: python tools/site/fetch_org.py && python tools/site/parse_org.py
       - name: 결과 저장
         if: always()
         run: |
