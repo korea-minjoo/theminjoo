@@ -1,0 +1,35 @@
+name: 당 홈페이지 조직도 수집
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - tools/site/fetch_org.py
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-org
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 수집
+        run: python tools/site/fetch_org.py
+      - name: 결과 저장
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git add tools/site/org
+          git diff --cached --quiet && { echo "변경 없음"; exit 0; }
+          git commit -m "당 홈페이지 조직도 수집 결과 ($(date -u +%F))"
+          git push
