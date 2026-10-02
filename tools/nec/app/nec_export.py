@@ -62,3 +62,41 @@ for f in sorted(glob.glob(os.path.join(SRC, "20*.json")), reverse=True):
 json.dump(index, open(os.path.join(OUT, "nec.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
 for fn in sorted(os.listdir(OUT)):
     print(fn, os.path.getsize(os.path.join(OUT, fn)) // 1024, "KB")
+
+
+# ── 투·개표 (nec/votes_<sgId>.json → nec_out/nec_votes_<sgId>.json) ──
+# turnout 행: [시도, 구시군, 선거인수, 투표수, 투표율]
+# count[선거종류] 행: [선거구, 시도, 구시군, 선거인수, 투표수, 유효, 무효, 기권, [[정당, 후보, 득표수], ...]]
+# 후보 순서는 선관위 개표표 순서(기호 순) 그대로. 순위를 매기지 않는다.
+vix = {}
+for f in sorted(glob.glob(os.path.join(SRC, "votes_*.json")), reverse=True):
+    d = json.load(open(f, encoding="utf-8"))
+    sg = d["sgId"]
+    o = {"sg": sg, "fetched": d.get("fetched_at"), "turnout": [], "count": {}}
+    for tc, r in d["types"].items():
+        if r["turnout"]["items"] and not o["turnout"]:
+            o["turnout"] = [[x.get("sdName"), x.get("wiwName"), x.get("totSunsu"), x.get("totTusu"), x.get("turnout")]
+                            for x in r["turnout"]["items"]]
+        rows = []
+        for x in r["count"]["items"]:
+            cs = []
+            for i in range(1, 51):
+                k = f"{i:02d}"
+                if x.get("hbj" + k) or x.get("jd" + k):
+                    cs.append([x.get("jd" + k) or "", x.get("hbj" + k) or "", x.get("dugsu" + k) or "0"])
+            rows.append([x.get("sggName") or "", x.get("sdName") or "", x.get("wiwName") or "", x.get("sunsu"),
+                         x.get("tusu"), x.get("yutusu"), x.get("mutusu"), x.get("gigwonsu"), cs])
+        if rows:
+            o["count"][tc] = rows
+    vix[sg] = {"fetched": o["fetched"], "types": list(o["count"]), "turnout": bool(o["turnout"])}
+    json.dump(o, open(os.path.join(OUT, f"nec_votes_{sg}.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+if vix:  # 색인에 투·개표 유무를 붙인다
+    ip = os.path.join(OUT, "nec.json")
+    ix = json.load(open(ip, encoding="utf-8"))
+    for e in ix["elections"]:
+        e["votes"] = vix.get(e["sg"])
+    ix["source"] = "중앙선거관리위원회 공공데이터(data.go.kr OpenAPI: 당선인·후보자·선거공약·정당정책·투개표 정보)"
+    json.dump(ix, open(ip, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    for fn in sorted(os.listdir(OUT)):
+        if fn.startswith("nec_votes"):
+            print(fn, os.path.getsize(os.path.join(OUT, fn)) // 1024, "KB")
