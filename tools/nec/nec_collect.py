@@ -8,7 +8,7 @@
 
 사용(내 PC): python nec_collect.py  → 키 입력 → 끝나면 nec_result.zip 생성. 옵션 [--only 20260603] [--budget 9000]
 """
-import argparse, json, os, sys, time, urllib.parse, urllib.request
+import argparse, json, os, sys, time, urllib.error, urllib.parse, urllib.request
 from datetime import datetime, timezone, timedelta
 
 BASE = "https://apis.data.go.kr/9760000/"
@@ -48,7 +48,12 @@ def call_page(path, page, **params):
         try:
             with urllib.request.urlopen(url, timeout=60) as r:
                 return json.loads(r.read().decode("utf-8"))
-        except Exception as e:  # 키가 담긴 URL은 절대 출력하지 않는다
+        except urllib.error.HTTPError as e:  # 키가 담긴 URL은 절대 출력하지 않는다
+            body = e.read().decode("utf-8", "replace")[:300].replace(KEY, "***") if KEY else ""
+            err = f"HTTP{e.code} {body}".strip()
+            if e.code in (401, 403):
+                break
+        except Exception as e:
             err = type(e).__name__
             time.sleep(2 ** attempt)
     return {"_error": err}
@@ -100,6 +105,7 @@ def main():
     global budget, KEY
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="이 sgId 하나만 수집")
+    ap.add_argument("--probe", action="store_true", help="API별 1회씩 호출해 승인·접속 상태만 확인")
     ap.add_argument("--budget", type=int, default=9000, help="이번 실행 최대 호출 수")
     a = ap.parse_args()
     budget = a.budget
@@ -110,6 +116,18 @@ def main():
         sys.exit("인증키가 없습니다.")
     KEY = urllib.parse.quote(KEY, safe="")
     os.makedirs(OUTDIR, exist_ok=True)
+    if a.probe:
+        sample = {"sgId": "20220601", "sgTypecode": "3"}
+        tests = {"codes": {}, "parties": {"sgId": "20220601"}, "winners": sample, "candidates": sample,
+                 "pledges": {**sample, "cnddtId": "0"}, "party_policy": {"sgId": "20220601", "partyName": "더불어민주당"}}
+        for name, prm in tests.items():
+            d = call_page(API[name], 1, **prm)
+            if "_error" in d:
+                print(f"[{name}] 실패: {d['_error']}")
+            else:
+                hdr = d.get("response", {}).get("header") or d.get("OpenAPI_ServiceResponse", {}).get("cmmMsgHeader", {})
+                print(f"[{name}] 응답: {json.dumps(hdr, ensure_ascii=False)[:200]}")
+        return
 
     codes = fetch_all("codes")
     print("선거코드", codes["code"], codes["total"])

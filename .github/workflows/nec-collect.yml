@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "특정 선거 ID만 (예: 20260603, 비우면 전체)"
+        description: "특정 선거 ID만 (예: 20260603, 비우면 전체, probe = 승인 상태 점검)"
         required: false
   push:
     paths:
@@ -37,7 +37,8 @@ jobs:
             echo "::error::저장소 Secrets에 DATA_GO_KR_SERVICE_KEY가 없습니다."; exit 1
           fi
           cd tools/nec
-          if [ -n "$ONLY" ]; then python nec_collect.py --only "$ONLY" < /dev/null; else python nec_collect.py < /dev/null; fi
+          if [ "$ONLY" = "probe" ]; then python nec_collect.py --probe < /dev/null
+          elif [ -n "$ONLY" ]; then python nec_collect.py --only "$ONLY" < /dev/null; else python nec_collect.py < /dev/null; fi
       - name: 결과 저장
         if: always()
         run: |
